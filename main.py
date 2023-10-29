@@ -9,6 +9,9 @@ from PIL import Image, ImageTk
 global timer_placement
 global current_happy_hour
 global wuba_timer 
+global current_happy_hour_end_time
+current_happy_hour_end_time = None
+global happy_hour_timer
 wuba_timer = tk.Tk()
 
 
@@ -20,37 +23,41 @@ def get_timedelta(end_time):
     time_left_string = f"{hours_left:0>{2}}:{minutes_left:0>{2}}:{seconds_left:0>{2}}"
     return time_left_string
 
-def update_happy_hour(end_time, happy_hour_timer):
-    happy_hour_timer.configure(text=get_timedelta(end_time))
-    wuba_timer.after(500, update_happy_hour, end_time, happy_hour_timer)
 
 def update():
     main_timer.configure(text=get_timedelta(datetime(2023, 11, 1, 12, 0, 0, 0)))
-    timer_update = wuba_timer.after(500, update)
+    if current_happy_hour_end_time != None:
+        happy_hour_timer.configure(text=get_timedelta(current_happy_hour_end_time))
+    wuba_timer.after(500, update)
 
 def replace():
     main_timer.place(relx=0.5, rely=0.5, anchor="center")
-    wuba_timer.after_cancel(update_happy_hour)
+    main_timer.configure(font=("Verve", 100))
+    current_happy_hour.destroy()
+    global current_happy_hour_end_time
+    current_happy_hour_end_time = None
 
 def happy_hour_container(end_time):
     container = tk.Frame(wuba_timer, bg="black", )
 
-    left_image = ImageTk.PhotoImage(Image.open("Kerze.png").resize((300, 300)))
+    tk.Label(container, text="Happy Hour", font=("GFS Didot", 50), fg="white", bg="black").grid(row=0, column=1)
+
+    left_image = ImageTk.PhotoImage(Image.open("Kerze.png").resize((500, 742.8)))
     left_image_label = tk.Label(container, image=left_image, bg="black")
     left_image_label.photo = left_image
-    left_image_label.grid(row=0, column=0, rowspan=2)
-
+    left_image_label.grid(row=0, column=0, rowspan=3)
+    
+    global happy_hour_timer
     happy_hour_timer = tk.Label(container, text=get_timedelta(end_time), font=("GFS Didot", 80), fg="white", bg="black")
-    happy_hour_timer.grid(row=0, column=1)
+    happy_hour_timer.grid(row=1, column=1)
 
-    tk.Label(container, text="Wubawasser für 20 Rupees", font=("GFS Didot", 50), fg="white", bg="black").grid(row=1, column=1)
+    tk.Label(container, text="Longdrinks und WuBawasser 1€ billiger!", font=("GFS Didot", 30), fg="white", bg="black").grid(row=2, column=1)
 
-    right_image = ImageTk.PhotoImage(Image.open("Wubawasser.png").resize((300, 300)))
+    right_image = ImageTk.PhotoImage(Image.open("Wubawasser.png").resize((500, 742.8)))
     right_image_label = tk.Label(container, image=right_image, bg="black")
     right_image_label.photo = right_image
-    right_image_label.grid(row=0, column=2, rowspan=2)
+    right_image_label.grid(row=0, column=2, rowspan=3)
 
-    container.after(500, lambda: update_happy_hour(end_time, happy_hour_timer))
     return container
 
 
@@ -66,10 +73,11 @@ webserver_thread.start()
 def launch_happy_hour():
     wuba_timer.after_cancel(replace)
     main_timer.place(relx=0.5, rely=0.8, anchor="center")
-    timer_placement = wuba_timer.after(3600*1000, replace)
-    end_time = datetime.now() + timedelta(hours=1)
-    global current_happy_hour 
-    current_happy_hour = happy_hour_container(end_time)
+    main_timer.configure(font=("Verve", 60))
+    wuba_timer.after(3600*1000, replace)
+    global current_happy_hour_end_time
+    current_happy_hour_end_time = datetime.now() + timedelta(hours=1)
+    global current_happy_hour
     current_happy_hour.place(relx=0.5, rely=0.5, anchor="center")
     return "super",201
 
@@ -77,9 +85,7 @@ def launch_happy_hour():
 def end_happy_hour():
     if type(current_happy_hour) == tk.Frame:  
         wuba_timer.after_cancel(replace)
-        wuba_timer.after_cancel(update_happy_hour)
-        current_happy_hour.destroy()
-        main_timer.place(relx=0.5, rely=0.5, anchor="center")
+        replace()
     return "super",201
     
 
