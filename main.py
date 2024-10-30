@@ -25,7 +25,7 @@ def get_timedelta(end_time):
 
 
 def update():
-    main_timer.configure(text=get_timedelta(datetime(2023, 11, 1, 12, 0, 0, 0)))
+    main_timer.configure(text=get_timedelta(datetime(2024, 11, 1, 12, 0, 0, 0)))
     if current_happy_hour_end_time != None:
         happy_hour_timer.configure(text=get_timedelta(current_happy_hour_end_time))
     wuba_timer.after(500, update)
