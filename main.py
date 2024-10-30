@@ -96,7 +96,7 @@ def end_happy_hour():
 # wuba_timer.geometry("1000x1000")
 wuba_timer.attributes("-fullscreen", True)
 wuba_timer["bg"] = "black"
-main_timer = tk.Label(wuba_timer, text=get_timedelta(datetime(2023, 11, 1, 12, 0, 0, 0)), font=("Verve", 100), fg="white", bg="black")
+main_timer = tk.Label(wuba_timer, text=get_timedelta(datetime(2024, 11, 1, 12, 0, 0, 0)), font=("Verve", 100), fg="white", bg="black")
 #print(type(main_timer))
 main_timer.place(relx=0.5, rely=0.5, anchor="center")
 timer_update = wuba_timer.after(500, update)
