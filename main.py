@@ -6,12 +6,11 @@ from datetime import timedelta
 from flask import Flask
 from PIL import Image, ImageTk
 
-global timer_placement
-global current_happy_hour
-global wuba_timer 
-global current_happy_hour_end_time
+timer_placement = None
+current_happy_hour = None
+wuba_timer = None
 current_happy_hour_end_time = None
-global happy_hour_timer
+happy_hour_timer = None
 wuba_timer = tk.Tk()
 
 
@@ -26,14 +25,17 @@ def get_timedelta(end_time):
 
 def update():
     main_timer.configure(text=get_timedelta(datetime(2024, 11, 1, 12, 0, 0, 0)))
-    if current_happy_hour_end_time != None:
+    if current_happy_hour_end_time is not None:
         happy_hour_timer.configure(text=get_timedelta(current_happy_hour_end_time))
     wuba_timer.after(500, update)
 
 def replace():
     main_timer.place(relx=0.5, rely=0.5, anchor="center")
     main_timer.configure(font=("Verve", 100))
-    current_happy_hour.destroy()
+    global current_happy_hour
+    if type(current_happy_hour) == tk.Frame:
+        current_happy_hour.destroy()
+    current_happy_hour = None
     global current_happy_hour_end_time
     current_happy_hour_end_time = None
 
@@ -42,7 +44,7 @@ def happy_hour_container(end_time):
 
     tk.Label(container, text="Happy Hour", font=("GFS Didot", 50), fg="white", bg="black").grid(row=0, column=1)
 
-    left_image = ImageTk.PhotoImage(Image.open("Kerze.png").resize((500, 742.8)))
+    left_image = ImageTk.PhotoImage(Image.open("Kerze.png").resize((500, 743)))
     left_image_label = tk.Label(container, image=left_image, bg="black")
     left_image_label.photo = left_image
     left_image_label.grid(row=0, column=0, rowspan=3)
@@ -53,7 +55,7 @@ def happy_hour_container(end_time):
 
     tk.Label(container, text="Longdrinks und WuBawasser 1€ billiger!", font=("GFS Didot", 30), fg="white", bg="black").grid(row=2, column=1)
 
-    right_image = ImageTk.PhotoImage(Image.open("Wubawasser.png").resize((500, 742.8)))
+    right_image = ImageTk.PhotoImage(Image.open("Wubawasser.png").resize((500, 743)))
     right_image_label = tk.Label(container, image=right_image, bg="black")
     right_image_label.photo = right_image
     right_image_label.grid(row=0, column=2, rowspan=3)
@@ -65,21 +67,26 @@ def happy_hour_container(end_time):
 #create Webserver
 webserver = Flask(__name__)
 webserver.debug = False
+webserver.url_map.strict_slashes = False
 #webserver.run(host="0.0.0.0", port=10000)
 webserver_thread = Thread(target=webserver.run, kwargs={'host': "0.0.0.0", 'port': 9873})
 webserver_thread.start()
 
 @webserver.route('/start_happy_hour/', methods=['PUT'])
 def launch_happy_hour():
-    wuba_timer.after_cancel(replace)
-    main_timer.place(relx=0.5, rely=0.8, anchor="center")
-    main_timer.configure(font=("Verve", 60))
-    wuba_timer.after(3600*1000, replace)
-    global current_happy_hour_end_time
-    current_happy_hour_end_time = datetime.now() + timedelta(hours=1)
     global current_happy_hour
-    current_happy_hour.place(relx=0.5, rely=0.5, anchor="center")
-    return "super",201
+    if current_happy_hour is None:
+        wuba_timer.after_cancel(replace)
+        main_timer.place(relx=0.5, rely=0.8, anchor="center")
+        main_timer.configure(font=("Verve", 60))
+        wuba_timer.after(3600*1000, replace)
+        global current_happy_hour_end_time
+        current_happy_hour_end_time = datetime.now() + timedelta(hours=1)
+        current_happy_hour = happy_hour_container(current_happy_hour_end_time)
+        current_happy_hour.place(relx=0.5, rely=0.5, anchor="center")
+        return "super", 201
+    else:
+        return "Bad Request", 400
 
 @webserver.route('/end_happy_hour/', methods=['PUT'])
 def end_happy_hour():
