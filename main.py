@@ -25,7 +25,9 @@ def get_timedelta(end_time):
 
 def update():
     main_timer.configure(text=get_timedelta(datetime(2024, 11, 1, 12, 0, 0, 0)))
-    if happy_hour_timer is not None:
+    global happy_hour_timer
+    global current_happy_hour_end_time
+    if type(happy_hour_timer) == tk.Label and current_happy_hour_end_time is not None:
         happy_hour_timer.configure(text=get_timedelta(current_happy_hour_end_time))
     wuba_timer.after(500, update)
 
@@ -39,7 +41,7 @@ def replace():
     global current_happy_hour_end_time
     current_happy_hour_end_time = None
 
-def happy_hour_container(end_time):
+def happy_hour_container(end_time_2):
     container = tk.Frame(wuba_timer, bg="black", )
 
     tk.Label(container, text="Happy Hour", font=("GFS Didot", 50), fg="white", bg="black").grid(row=0, column=1)
@@ -50,7 +52,7 @@ def happy_hour_container(end_time):
     left_image_label.grid(row=0, column=0, rowspan=3)
     
     global happy_hour_timer
-    happy_hour_timer = tk.Label(container, text=get_timedelta(end_time), font=("GFS Didot", 80), fg="white", bg="black")
+    happy_hour_timer = tk.Label(container, text=get_timedelta(end_time_2), font=("GFS Didot", 80), fg="white", bg="black")
     happy_hour_timer.grid(row=1, column=1)
 
     tk.Label(container, text="Longdrinks und WuBawasser 1€ billiger!", font=("GFS Didot", 30), fg="white", bg="black").grid(row=2, column=1)
