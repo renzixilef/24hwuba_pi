@@ -40,6 +40,8 @@ def replace():
     current_happy_hour = None
     global current_happy_hour_end_time
     current_happy_hour_end_time = None
+    global happy_hour_timer
+    happy_hour_timer = None
 
 def happy_hour_container(end_time_2):
     container = tk.Frame(wuba_timer, bg="black", )
